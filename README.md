@@ -2,6 +2,8 @@
 
 FlightSurety is a sample application project for Udacity's Blockchain course.
 
+Project rubric can be found [here](https://review.udacity.com/#!/rubrics/1711/view).
+
 ## Install
 
 This repository contains Smart Contract code in Solidity (using Truffle), tests (also using Truffle), dApp scaffolding (using HTML, CSS and JS) and server app scaffolding.
