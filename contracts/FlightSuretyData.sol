@@ -12,6 +12,39 @@ contract FlightSuretyData {
     address private contractOwner;                                      // Account used to deploy contract
     bool private operational = true;                                    // Blocks all state changes throughout the contract if false
 
+    struct Airline {
+        string name;
+        address airlineAddress;
+        AirlineState state;
+
+        mapping(address => bool) approvals;
+        uint8 approvalCount;
+    }
+
+    enum AirlineState {
+        Applied,
+        Registered,
+        Paid
+    }
+
+    struct Insurance {
+        string flight;
+        uint256 amount;
+        uint256 payoutAmount;
+        InsuranceState state;
+    }
+
+    enum InsuranceState {
+        Bought,
+        Credited
+    }
+
+    mapping(address => bool) private authorizedAppContracts;
+    mapping(address => Airline) internal airlines;
+    mapping(address => mapping(string => Insurance)) private insurances;
+    mapping(address => uint256) private insureeBalances;
+    uint256 internal paidAirlinesCount = 0;
+
     /********************************************************************************************/
     /*                                       EVENT DEFINITIONS                                  */
     /********************************************************************************************/
@@ -27,6 +60,9 @@ contract FlightSuretyData {
     public
     {
         contractOwner = msg.sender;
+        authorizedAppContracts[msg.sender] = true;
+        airlines[contractOwner] = Airline("First Airline", contractOwner, AirlineState.Paid, 0);
+        paidAirlinesCount = 1;
     }
 
     /********************************************************************************************/
@@ -54,6 +90,12 @@ contract FlightSuretyData {
     modifier requireContractOwner()
     {
         require(msg.sender == contractOwner, "Caller is not contract owner");
+        _;
+    }
+
+    modifier requireAuthorizedCaller()
+    {
+        require(authorizedAppContracts[msg.sender], "Caller is not authorised");
         _;
     }
 
@@ -90,6 +132,16 @@ contract FlightSuretyData {
         operational = mode;
     }
 
+    function setAppContractAuthorizationStatus(address appContract, bool status) external requireContractOwner
+    {
+        authorizedAppContracts[appContract] = status;
+    }
+
+    function getAppContractAuthorizationStatus(address caller) public view requireContractOwner returns (bool)
+    {
+        return authorizedAppContracts[caller];
+    }
+
     /********************************************************************************************/
     /*                                     SMART CONTRACT FUNCTIONS                             */
     /********************************************************************************************/
@@ -99,37 +151,94 @@ contract FlightSuretyData {
      *      Can only be called from FlightSuretyApp contract
      *
      */
+    // CRUD operations for airline
     function registerAirline
     (
+        address airlineAddress, uint8 state, string name
     )
     external
-    pure
+    requireAuthorizedCaller
     {
+        airlines[airlineAddress] = Airline(name, airlineAddress, AirlineState(state), 0);
     }
+
+    function updateAirlineState(address airlineAddress, uint8 state)
+    external requireAuthorizedCaller
+    {
+        airlines[airlineAddress].state = AirlineState(state);
+        if (state == 2) {
+            paidAirlinesCount++;
+        }
+    }
+
+    function getAirlineState(address airline)
+    external view
+    requireAuthorizedCaller
+    returns (AirlineState)
+    {
+        return airlines[airline].state;
+    }
+
+    function getPaidAirlinesCount()
+    external view
+    requireAuthorizedCaller
+    returns (uint256)
+    {
+        return paidAirlinesCount;
+    }
+
+    //approving to-be-registered airline by existing airline.
+    function approveAirlineRegistration
+    (
+        address registeringAirline, address approvingAirline
+    )
+    external
+    requireAuthorizedCaller
+    returns (uint8)
+
+    {
+        require(!airlines[registeringAirline].approvals[approvingAirline], "Airline is already approved by the caller.");
+
+        airlines[registeringAirline].approvals[approvingAirline] = true;
+        //incrementing number of approvals for the registration.
+        airlines[registeringAirline].approvalCount++;
+
+        return airlines[registeringAirline].approvalCount;
+    }
+
 
 
     /**
      * @dev Buy insurance for a flight
      *
      */
-    function buy
+    function buyInsurance
     (
+        address insuree, string flight, uint256 amount, uint256 payoutAmount
     )
     external
-    payable
+    requireAuthorizedCaller
     {
-
+        require(insurances[insuree][flight].amount != 0, "Insuree already insured");
+        insurances[insuree][flight] = Insurance(flight, amount, payoutAmount, InsuranceState.Bought);
     }
 
     /**
      *  @dev Credits payouts to insurees
     */
-    function creditInsurees
+    function creditInsuredPassenger
     (
+        address insuree, string flight
     )
     external
-    pure
+    requireAuthorizedCaller
     {
+        //Checks
+        require(insurances[insuree][flight].state == InsuranceState.Bought);
+        //Effects
+        insurances[insuree][flight].state = InsuranceState.Credited;
+        //Interaction
+        insureeBalances[insuree] = insureeBalances[insuree] + insurances[insuree][flight].payoutAmount;
     }
 
 
@@ -137,12 +246,19 @@ contract FlightSuretyData {
      *  @dev Transfers eligible payout funds to insuree
      *
     */
-    function pay
+    function payInsuredPassenger
     (
+        address insuree
     )
     external
-    pure
+    requireAuthorizedCaller
     {
+        //Checks
+        require(insureeBalances[insuree] > 0, "Insuree doesn't have enough funds");
+        //Effects
+        insureeBalances[insuree] = 0;
+        //Interaction
+        insuree.transfer(insureeBalances[insuree]);
     }
 
     /**
