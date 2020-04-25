@@ -3,7 +3,7 @@ var Test = require('../config/testConfig.js');
 
 contract('Oracles', async (accounts) => {
 
-    const TEST_ORACLES_COUNT = 20;
+    const TEST_ORACLES_COUNT = 9;
     var config;
     before('setup contract', async () => {
         config = await Test.Config(accounts);
@@ -26,9 +26,10 @@ contract('Oracles', async (accounts) => {
 
         // ACT
         for (let a = 1; a < TEST_ORACLES_COUNT; a++) {
+            console.log(accounts[a])
             await config.flightSuretyApp.registerOracle({from: accounts[a], value: fee});
             let result = await config.flightSuretyApp.getMyIndexes.call({from: accounts[a]});
-            console.log(`Oracle Registered: ${result[0]}, ${result[1]}, ${result[2]}`);
+            console.log(`Oracle Registered: ${result[0]}, ${result[1]}, ${result[2]}, ${accounts[a]}`);
         }
     });
 
