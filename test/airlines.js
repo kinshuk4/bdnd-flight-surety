@@ -14,13 +14,22 @@ contract('Airline Tests', async (accounts) => {
         await config.flightSuretyData.authorizeCaller(config.flightSuretyApp.address);
     });
 
-    /****************************************************************************************/
-    /* Operations and Settings                                                              */
-    /****************************************************************************************/
-
     it('Contract owner is created as first airline', async function () {
         assert.equal(await config.flightSuretyData.getAirlineState(firstAirline), 2, "First airline");
         await config.flightSuretyData.totalPaid
+    });
+
+    it('Airline cannot register an Airline using registerAirline() if it is not funded', async () => {
+        try {
+            await config.flightSuretyApp.registerAirline(thirdAirline, {from: secondAirline});
+        } catch (e) {
+
+        }
+        let result = await config.flightSuretyData.getAirlineState.call(thirdAirline);
+
+        // ASSERT
+        assert.equal(result.toNumber(), 0, "Airline should not be able to register another airline if it hasn't provided funding");
+
     });
 
     it('Airlines can apply for registration', async function () {
