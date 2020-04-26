@@ -157,8 +157,8 @@ contract FlightSuretyApp {
         flightSuretyData = FlightSuretyData(dataContractAddress);
 
         _registerFlight(STATUS_CODE_UNKNOWN, "FLT1", now);
-        _registerFlight(STATUS_CODE_UNKNOWN, "FLT2", now);
-        _registerFlight(STATUS_CODE_UNKNOWN, "FLT3", now);
+        _registerFlight(STATUS_CODE_UNKNOWN, "FLT2", now + 1 days);
+        _registerFlight(STATUS_CODE_UNKNOWN, "FLT3", now + 2 days);
     }
 
     /********************************************************************************************/
