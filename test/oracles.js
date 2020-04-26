@@ -22,7 +22,7 @@ contract('Oracles', async (accounts) => {
     it('can register oracles', async () => {
 
         // ARRANGE
-        let fee = await config.flightSuretyApp.REGISTRATION_FEE.call();
+        let fee = await config.flightSuretyApp.ORACLE_REGISTRATION_FEE.call();
 
         // ACT
         for (let a = 1; a < TEST_ORACLES_COUNT; a++) {
