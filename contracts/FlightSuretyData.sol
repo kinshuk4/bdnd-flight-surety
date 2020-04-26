@@ -40,6 +40,7 @@ contract FlightSuretyData {
     }
 
     mapping(address => bool) private authorizedAppContracts;
+//    address[]  authorizedAppContractList;
     mapping(address => Airline) internal airlines;
     mapping(address => mapping(string => Insurance)) private insurances;
     mapping(address => uint256) private insureeBalances;
@@ -61,6 +62,7 @@ contract FlightSuretyData {
     {
         contractOwner = msg.sender;
         authorizedAppContracts[msg.sender] = true;
+//        authorizedAppContractList.push(msg.sender);
         airlines[contractOwner] = Airline("First Airline", contractOwner, AirlineState.Paid, 0);
         paidAirlinesCount = 1;
     }
@@ -95,7 +97,7 @@ contract FlightSuretyData {
 
     modifier requireAuthorizedCaller()
     {
-        require(authorizedAppContracts[msg.sender], "Caller is not authorised");
+        require(authorizedAppContracts[msg.sender] || (msg.sender == contractOwner), "Caller is not authorised");
         _;
     }
 

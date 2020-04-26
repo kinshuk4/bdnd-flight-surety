@@ -156,9 +156,9 @@ contract FlightSuretyApp {
         dataContractAddress = _dataContractAddress;
         flightSuretyData = FlightSuretyData(dataContractAddress);
 
-        _registerFlight(STATUS_CODE_UNKNOWN, "FLT1", now);
-        _registerFlight(STATUS_CODE_UNKNOWN, "FLT2", now + 1 days);
-        _registerFlight(STATUS_CODE_UNKNOWN, "FLT3", now + 2 days);
+        _registerFlight(STATUS_CODE_UNKNOWN, "FLT1", now, contractOwner);
+        _registerFlight(STATUS_CODE_UNKNOWN, "FLT2", now + 1 days, contractOwner);
+        _registerFlight(STATUS_CODE_UNKNOWN, "FLT3", now + 2 days, contractOwner);
     }
 
     /********************************************************************************************/
@@ -252,12 +252,12 @@ contract FlightSuretyApp {
 
     function _registerFlight
     (
-        uint8 status, string flight, uint256 flightTime
+        uint8 status, string flight, uint256 flightTime, address airline
     )
     private
     {
-        bytes32 flightKey = getFlightKey(msg.sender, flight, flightTime);
-        flights[flightKey] = Flight(true, status, flightTime, msg.sender, flight);
+        bytes32 flightKey = getFlightKey(airline, flight, flightTime);
+        flights[flightKey] = Flight(true, status, flightTime, airline, flight);
         flightKeyList.push(flightKey);
     }
 
@@ -272,7 +272,7 @@ contract FlightSuretyApp {
     external
     onlyPaidAirlines
     {
-        _registerFlight(status, flight, now);
+        _registerFlight(status, flight, now, msg.sender);
     }
 
 
@@ -354,6 +354,14 @@ contract FlightSuretyApp {
     {
         return flightSuretyData.getInsurance(msg.sender, flight);
     }
+
+//    function getAuthorized(string flight)
+//    external view
+//    returns (uint8 index)
+//    {
+//        return flightSuretyData.getAuthorized(msg.sender, index);
+//    }
+
     /** ORACLES */
     // Register an oracle with the contract
     function registerOracle
