@@ -155,6 +155,10 @@ contract FlightSuretyApp {
         contractOwner = msg.sender;
         dataContractAddress = _dataContractAddress;
         flightSuretyData = FlightSuretyData(dataContractAddress);
+
+        _registerFlight(STATUS_CODE_UNKNOWN, "FLT1", now);
+        _registerFlight(STATUS_CODE_UNKNOWN, "FLT2", now);
+        _registerFlight(STATUS_CODE_UNKNOWN, "FLT3", now);
     }
 
     /********************************************************************************************/
@@ -246,6 +250,17 @@ contract FlightSuretyApp {
     }
 
 
+    function _registerFlight
+    (
+        uint8 status, string flight, uint256 flightTime
+    )
+    private
+    {
+        bytes32 flightKey = getFlightKey(msg.sender, flight, flightTime);
+        flights[flightKey] = Flight(true, status, flightTime, msg.sender, flight);
+        flightKeyList.push(flightKey);
+    }
+
     /**
      * @dev Register a future flight for insuring.
      *
@@ -257,9 +272,7 @@ contract FlightSuretyApp {
     external
     onlyPaidAirlines
     {
-        bytes32 flightKey = getFlightKey(msg.sender, flight, now);
-        flights[flightKey] = Flight(true, status, now, msg.sender, flight);
-        flightKeyList.push(flightKey);
+        _registerFlight(status, flight, now);
     }
 
 
