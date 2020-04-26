@@ -40,7 +40,7 @@ contract FlightSuretyData {
     }
 
     mapping(address => bool) private authorizedAppContracts;
-//    address[]  authorizedAppContractList;
+    //    address[]  authorizedAppContractList;
     mapping(address => Airline) internal airlines;
     mapping(address => mapping(string => Insurance)) private insurances;
     mapping(address => uint256) private insureeBalances;
@@ -62,7 +62,7 @@ contract FlightSuretyData {
     {
         contractOwner = msg.sender;
         authorizedAppContracts[msg.sender] = true;
-//        authorizedAppContractList.push(msg.sender);
+        //        authorizedAppContractList.push(msg.sender);
         airlines[contractOwner] = Airline("First Airline", contractOwner, AirlineState.Paid, 0);
         paidAirlinesCount = 1;
     }
@@ -255,6 +255,13 @@ contract FlightSuretyData {
         insurances[insuree][flight].state = InsuranceState.Credited;
         //Interaction
         insureeBalances[insuree] = insureeBalances[insuree] + insurances[insuree][flight].payoutAmount;
+    }
+
+    function getInsureeBalance(address insuree)
+    external view requireAuthorizedCaller
+    returns (uint256)
+    {
+        return insureeBalances[insuree];
     }
 
 

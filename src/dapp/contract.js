@@ -105,4 +105,58 @@ export default class Contract {
                     callback(error, insurance)
                 })
     }
+
+    async getAllPassengerInsurances(flights) {
+        const insurances = [];
+        for (const flight of flights) {
+            const insurance = await this.flightSuretyApp.methods
+                .getInsurance(flight.name)
+                .call({from: this.owner});
+
+            if (insurance.amount !== "0") insurances.push({
+                amount: this.web3.utils.fromWei(insurance.amount, 'ether'),
+                payoutAmount: this.web3.utils.fromWei(insurance.payoutAmount, 'ether'),
+                state: insurance.state,
+                flight: flight
+            });
+        }
+        return insurances;
+    }
+
+
+    async claimInsurance(flight, callback) {
+        const flightDetails = await self.flightSuretyApp.methods.getFlight(flight).call();
+        let payload = {
+            airline: flightDetails.airline,
+            flight: flightDetails.name,
+            timestamp: flightDetails.timestamp,
+        }
+        await self.flightSuretyApp.methods
+            .claimInsurance(payload.airline, payload.flight, payload.timestamp)
+            .send({from: self.owner},
+            async (error, result) => {
+                callback(error, result);
+            });
+    }
+
+    async getBalance() {
+        await self.flightSuretyApp.methods
+            .getBalance()
+            .call({ from: this.owner },
+                async (error, result) => {
+                resolve(this.web3.utils.fromWei(result, 'ether'));
+            });
+    }
+
+    async withdrawBalance() {
+        await self.flightSuretyApp.methods
+            .withdrawBalance()
+            .send(
+                { from: this.owner },
+                (err, res) => {
+                    if (err) reject(err);
+                    resolve(res);
+                }
+            );
+    }
 }

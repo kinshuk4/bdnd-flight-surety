@@ -21,7 +21,11 @@ import './flightsurety.css';
 
         //setup contract
         contract.authotizeOwner((error, result) => {
-            display('Authorization Status', 'Set owner as authorized', [ { label: 'Authorization Status', error: error, value: result} ]);
+            display('Authorization Status', 'Set owner as authorized', [{
+                label: 'Authorization Status',
+                error: error,
+                value: result
+            }]);
         })
 
         // User-submitted transaction
@@ -30,14 +34,14 @@ import './flightsurety.css';
             // Write transaction
             contract.fetchFlightStatus(flight, (error, result) => {
                 displayInContainer("oracle-wrapper",
-                    [ {
+                    [{
                         label: 'Fetch Flight Status',
                         error: error,
                         value: result.flight + ' ' + result.timestamp + ' ' + result.statusCode
-                    } ]);
+                    }]);
             });
         })
-
+        const flights = [];
         contract.getAllFlights((error, results) => {
             const purchaseInsuranceSelect = DOM.elid('buy-insurance-flights');
             let i = 0;
@@ -47,6 +51,7 @@ import './flightsurety.css';
                 const prettyDate = new Date(flight.timestamp * 1000).toDateString();
                 option.textContent = `${flight.name} on ${prettyDate}`;
                 purchaseInsuranceSelect.appendChild(option);
+                flights.push(flight)
                 i++;
             });
         })
@@ -56,18 +61,25 @@ import './flightsurety.css';
             let fee = DOM.elid('buy-insurance-amount').value;
             contract.buyInsurance(Number(flight), fee, (error, result) => {
                 console.log(error, result)
-                displayInContainer("buy-insurance-wrapper", [ { label: 'Purchase insurance for a flight', error: error, value: result.flight + ' ' + result.timestamp + ' ' + result.statusCode + ' price: ' + result.amount + 'ETH -  payout-price: ' + result.payoutAmount + ' ETH'} ]);
+                displayInContainer("buy-insurance-wrapper",
+                    [{
+                        label: 'Purchase insurance for a flight',
+                        error: error,
+                        value: result.flight + ' ' + result.timestamp + ' ' + result.statusCode + ' price: ' + result.amount + 'ETH -  payout-price: ' + result.payoutAmount + ' ETH'
+                    }]);
+            })
+
+            contract.getAllPassengerInsurances(flights).then(insurances => {
+                displayInContainer("bought-insurance-wrapper", [{
+                    label: 'Insurances Bought',
+                    value: JSON.stringify(insurances)
+                }])
             })
         })
 
     });
 
-
-
-
-
-
-
+    
 
 
 })();

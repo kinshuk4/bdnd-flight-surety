@@ -280,10 +280,10 @@ contract FlightSuretyApp {
     function getFlight(uint256 index) external view
     returns (address airline, string memory name, uint256 timestamp, uint8 statusCode)
     {
-        airline = flights[ flightKeyList[index] ].airline;
-        name = flights[ flightKeyList[index] ].name;
-        timestamp = flights[ flightKeyList[index] ].updatedTimestamp;
-        statusCode = flights[ flightKeyList[index] ].statusCode;
+        airline = flights[flightKeyList[index]].airline;
+        name = flights[flightKeyList[index]].name;
+        timestamp = flights[flightKeyList[index]].updatedTimestamp;
+        statusCode = flights[flightKeyList[index]].statusCode;
     }
 
     function getNumFlights() external view returns (uint256 count)
@@ -342,7 +342,7 @@ contract FlightSuretyApp {
 
         dataContractAddress.transfer(msg.value);
 
-        uint256 payoutAmount = msg.value + msg.value/2;
+        uint256 payoutAmount = msg.value + msg.value / 2;
 
         flightSuretyData.buyInsurance(msg.sender, flight, msg.value, payoutAmount);
 
@@ -364,12 +364,23 @@ contract FlightSuretyApp {
         return flightSuretyData.getInsurance(msg.sender, flight);
     }
 
-//    function getAuthorized(string flight)
-//    external view
-//    returns (uint8 index)
-//    {
-//        return flightSuretyData.getAuthorized(msg.sender, index);
-//    }
+    function getBalance()
+    external view returns (uint256 balance)
+    {
+        balance = flightSuretyData.getInsureeBalance(msg.sender);
+    }
+
+    function withdrawBalance() external
+    {
+        flightSuretyData.payInsuredPassenger(msg.sender);
+    }
+
+    //    function getAuthorized(string flight)
+    //    external view
+    //    returns (uint8 index)
+    //    {
+    //        return flightSuretyData.getAuthorized(msg.sender, index);
+    //    }
 
     /** ORACLES */
     // Register an oracle with the contract
@@ -420,7 +431,10 @@ contract FlightSuretyApp {
     )
     external
     {
-        require((oracles[msg.sender].indexes[0] == index) || (oracles[msg.sender].indexes[1] == index) || (oracles[msg.sender].indexes[2] == index), "Index does not match oracle request");
+        require(
+            (oracles[msg.sender].indexes[0] == index) ||
+            (oracles[msg.sender].indexes[1] == index) ||
+            (oracles[msg.sender].indexes[2] == index), "Index does not match oracle request");
 
 
         bytes32 key = keccak256(abi.encodePacked(index, airline, flight, timestamp));
@@ -521,6 +535,8 @@ contract FlightSuretyData {
     function buyInsurance(address passenger, string flight, uint256 amount, uint256 payoutAmount) external;
 
     function creditInsuredPassenger(address insuree, string flight) external;
+
+    function getInsureeBalance(address passenger) external view returns (uint256);
 
     function payInsuredPassenger(address passenger) external;
 
