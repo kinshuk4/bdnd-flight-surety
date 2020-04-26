@@ -40,8 +40,7 @@ contract('Flight Surety Passenger Tests', async (accounts) => {
 
 
     it('Passengers cannot buy insurance more than 1 ether.', async function () {
-
-        const flight1 = await config.flightSuretyApp.getFlight(0);
+        const flight1 = await config.flightSuretyApp.getFlight(passenger_choose);
         let amount = await config.flightSuretyApp.MAX_INSURANCE_PREMIUM.call();
         amount = amount + amount;
 
@@ -61,7 +60,37 @@ contract('Flight Surety Passenger Tests', async (accounts) => {
         assert.equal(failed, true, "Passenger was able to purchase insurance of more than 1 ether");
     });
 
+    it('Passenger cannot buy the same insurance', async() => {
+        const flight1 = await config.flightSuretyApp.getFlight(passenger_choose);
+        const amount = await config.flightSuretyApp.MAX_INSURANCE_PREMIUM.call();
+
+        var failed = false;
+
+        try {
+            await config.flightSuretyApp.purchaseInsurance(flight1.airline, flight1.flight, flight1.timestamp, {from: accounts[5], value: amount});
+        } catch(err){
+            failed =true;
+        }
+
+        assert.equal(failed, true, "Passenger was able to buy the same insurance twice");
+    })
+
     it('Passenger can check status of the flight', async function () {
+
+        const flight1 = await config.flightSuretyApp.getFlight(0);
+
+        const fetchFlightStatus = await config.flightSuretyApp.fetchFlightStatus(
+            flight1.airline,
+            flight1.name,
+            flight1.timestamp,
+        );
+
+        truffleAssert.eventEmitted(fetchFlightStatus, 'OracleRequest', (ev) => {
+            return ev.airline === flight1.airline;
+        });
+    });
+
+    it('If flight is delayed due to airline fault, passenger receives credit of 1.5X the amount they paid', async function () {
 
         const flight1 = await config.flightSuretyApp.getFlight(0);
 
