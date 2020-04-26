@@ -3,7 +3,7 @@ import Config from './config.json';
 import Web3 from 'web3';
 import express from 'express';
 import 'babel-polyfill';
-
+import BigNumber from 'bignumber.js';
 
 let config = Config['localhost'];
 let web3 = new Web3(new Web3.providers.WebsocketProvider(config.url.replace('http', 'ws')));
@@ -17,6 +17,18 @@ async function init() {
     const NUMBER_OF_ORACLES = 20;
     const accounts = await web3.eth.getAccounts();
     registerOracles(accounts.slice(1, NUMBER_OF_ORACLES + 1));
+
+    flightSuretyApp.events.OracleRequest({fromBlock: 0}, (error, event) => {
+        if (error) return console.log(error);
+        console.log(event)
+
+        fetchFlightStatus(
+            event.returnValues.index,
+            event.returnValues.airline,
+            event.returnValues.flight,
+            event.returnValues.timestamp
+        )
+    });
 }
 
 async function registerOracles(oracleAccounts) {
@@ -42,6 +54,34 @@ async function registerOracles(oracleAccounts) {
     }
 
     console.log(`${oracles.length} Oracles Registered`);
+}
+
+async function fetchFlightStatus(index, airline, flight, timestamp) {
+
+    if (oracles.length === 0) return;
+
+    console.log("FlightStatus requested.")
+    console.log(index, airline, flight, timestamp);
+
+    const selectedOracles = [];
+
+    oracles.forEach((oracle) => {
+        if ( BigNumber(oracle.indexes[0]).isEqualTo(index) ) selectedOracles.push( oracle );
+        if ( BigNumber(oracle.indexes[1]).isEqualTo(index) ) selectedOracles.push( oracle );
+        if ( BigNumber(oracle.indexes[2]).isEqualTo(index) ) selectedOracles.push( oracle );
+    });
+
+    console.log(`Selected oracles: ${JSON.stringify(selectedOracles)}`);
+
+    selectedOracles.forEach( (oracle) => {
+        flightSuretyApp.methods
+            .submitOracleResponse(index, airline, flight, timestamp, oracle.statusCode)
+            .send({ from: oracle.address, gas: 5555555 })
+            .then(() => {
+                console.log(`Oracle ${JSON.stringify(oracle)} fetched flight details.`);
+            })
+            .catch((err) => console.log(`Oracle ${JSON.stringify(oracle)} rejected`));
+    });
 }
 
 const app = express();
