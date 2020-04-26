@@ -58,6 +58,7 @@ contract FlightSuretyApp {
 
     // Fee to be paid when registering oracle
     uint256 public constant ORACLE_REGISTRATION_FEE = 1 ether;
+    uint256 public constant AIRLINE_REGISTRATION_FEE = 10 ether;
 
     // Number of oracles that must respond for valid status
     uint256 private constant MIN_RESPONSES = 3;
@@ -241,7 +242,7 @@ contract FlightSuretyApp {
 
     function payAirlineDues() external payable onlyRegisteredAirlines
     {
-        require(msg.value == 10 ether, "Payment of 10 ether is required to complete registration.");
+        require(msg.value == AIRLINE_REGISTRATION_FEE, "Payment of 10 ether is required to complete registration.");
 
         dataContractAddress.transfer(msg.value);
         flightSuretyData.updateAirlineState(msg.sender, 2);
@@ -346,6 +347,14 @@ contract FlightSuretyApp {
         flightSuretyData.buyInsurance(msg.sender, flight, msg.value, payoutAmount);
 
         emit PassengerInsuranceBought(msg.sender, flightKey);
+    }
+
+    function claimInsurance(address airline, string flight, uint256 timestamp) external
+    {
+        bytes32 flightKey = getFlightKey(airline, flight, timestamp);
+        require(flights[flightKey].statusCode == STATUS_CODE_LATE_AIRLINE, "Flight was not late");
+
+        flightSuretyData.creditInsuredPassenger(msg.sender, flight);
     }
 
     function getInsurance(string flight)

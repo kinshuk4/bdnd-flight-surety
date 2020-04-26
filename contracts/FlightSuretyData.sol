@@ -250,7 +250,7 @@ contract FlightSuretyData {
     requireAuthorizedCaller
     {
         //Checks
-        require(insurances[insuree][flight].state == InsuranceState.Bought);
+        require(insurances[insuree][flight].state == InsuranceState.Bought, "Insurance amount already credited");
         //Effects
         insurances[insuree][flight].state = InsuranceState.Credited;
         //Interaction
