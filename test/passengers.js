@@ -10,15 +10,12 @@ contract('Flight Surety Passenger Tests', async (accounts) => {
     before('setup contract', async () => {
         config = await Test.Config(accounts);
         await config.flightSuretyData.authorizeCaller(config.flightSuretyApp.address);
-        await config.flightSuretyApp.registerFlight(0, "Flight1")
-        await config.flightSuretyApp.registerFlight(0, "Flight2")
-        await config.flightSuretyApp.registerFlight(0, "Flight3")
     });
 
     it('Passengers can choose from a fixed list of flight numbers and departure that are defined in the Dapp client', async function () {
 
         const flight1 = await config.flightSuretyApp.getFlight(passenger_choose);
-        assert.equal(flight1.name, "Flight1", "Chosen flight doesn't match.")
+        assert.equal(flight1.name, "FLT1", "Chosen flight doesn't match.")
     });
 
     it('Passengers may pay up to 1 ether for purchasing flight insurance', async function () {

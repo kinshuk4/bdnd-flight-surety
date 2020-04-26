@@ -11,11 +11,9 @@ contract('Flight Surety Passenger Tests', async (accounts) => {
     });
 
     it('Can register flights', async function () {
-        await config.flightSuretyApp.registerFlight(0, "Flight1")
-        await config.flightSuretyApp.registerFlight(0, "Flight2")
-        await config.flightSuretyApp.registerFlight(0, "Flight3")
+        await config.flightSuretyApp.registerFlight(0, "FLT4")
         const count = await config.flightSuretyApp.getNumFlights();
-        assert.equal(count, 3, "Flight Count check was successful.");
+        assert.equal(count, 4, "Flight Count check was successful.");
     });
 
 });
