@@ -19,21 +19,55 @@ import './flightsurety.css';
             }]);
         });
 
+        //setup contract
+        contract.authotizeOwner((error, result) => {
+            display('Authorization Status', 'Set owner as authorized', [ { label: 'Authorization Status', error: error, value: result} ]);
+        })
 
         // User-submitted transaction
         DOM.elid('submit-oracle').addEventListener('click', () => {
             let flight = DOM.elid('flight-number').value;
             // Write transaction
             contract.fetchFlightStatus(flight, (error, result) => {
-                display('Oracles', 'Trigger oracles', [{
-                    label: 'Fetch Flight Status',
-                    error: error,
-                    value: result.flight + ' ' + result.timestamp
-                }]);
+                displayInContainer("oracle-wrapper",
+                    [ {
+                        label: 'Fetch Flight Status',
+                        error: error,
+                        value: result.flight + ' ' + result.timestamp + ' ' + result.statusCode
+                    } ]);
             });
         })
 
+        contract.getAllFlights((error, results) => {
+            const purchaseInsuranceSelect = DOM.elid('buy-insurance-flights');
+            let i = 0;
+            results.forEach((flight) => {
+                const option = document.createElement('option');
+                option.value = `${i}-${flight.airline}-${flight.name}-${flight.timestamp}`;
+                const prettyDate = new Date(flight.timestamp * 1000).toDateString();
+                option.textContent = `${flight.name} on ${prettyDate}`;
+                purchaseInsuranceSelect.appendChild(option);
+                i++;
+            });
+        })
+
+        DOM.elid('submit-buy-insurance').addEventListener('click', () => {
+            let flight = DOM.elid('buy-insurance-flights').value.split('-')[0];
+            let fee = DOM.elid('buy-insurance-amount').value;
+            contract.buyInsurance(Number(flight), fee, (error, result) => {
+                console.log(error, result)
+                displayInContainer("buy-insurance-wrapper", [ { label: 'Purchase insurance for a flight', error: error, value: result.flight + ' ' + result.timestamp + ' ' + result.statusCode + ' price: ' + result.amount + 'ETH -  payout-price: ' + result.payoutAmount + ' ETH'} ]);
+            })
+        })
+
     });
+
+
+
+
+
+
+
 
 
 })();
@@ -53,6 +87,22 @@ function display(title, description, results) {
     displayDiv.append(section);
 
 }
+
+function displayInContainer(containerId, results) {
+    let displayDiv = DOM.elid(containerId);
+    let section = DOM.section();
+
+    results.map((result) => {
+        let row = section.appendChild(DOM.div({className: 'row'}));
+        row.appendChild(DOM.div({className: 'col-sm-4 field'}, result.label));
+        row.appendChild(DOM.div({className: 'col-sm-8 field-value'}, result.error ? String(result.error) : String(result.value)));
+        section.appendChild(row);
+        console.log(section)
+    })
+    displayDiv.append(section);
+
+}
+
 
 
 

@@ -60,7 +60,7 @@ async function fetchFlightStatus(index, airline, flight, timestamp) {
 
     if (oracles.length === 0) return;
 
-    console.log("FlightStatus requested.")
+    console.log(`Status requested for ${flight}`)
     console.log(index, airline, flight, timestamp);
 
     const selectedOracles = [];

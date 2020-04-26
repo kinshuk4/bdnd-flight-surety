@@ -24,9 +24,25 @@
 
     <div id="display-wrapper" class="top-20">
     </div>
-    <div class="row top-20">
-        <label class="form">Flight</label> <input type="text" id="flight-number">
+    <div class="top-20"  id ="oracle-wrapper">
+        <h2>Oracle</h2> <br>
+        <p class="description">Trigger Oracles</p> <br>
+        <label class="form">Flight</label> <input type="number" id="flight-number" >
         <btn class="btn btn-primary" id="submit-oracle">Submit to Oracles</btn>
+    </div>
+
+    <div id="buy-insurance-wrapper" class="top-20">
+        <h2>Purchase Insurance</h2> <br>
+
+        <p class="description">Select a flight from down to purchase an insurance</p> <br>
+
+        <label class="form">Flight</label>
+        <select name="buy-insurance" id="buy-insurance-flights"></select> <br>
+
+        <label class="form">Ether</label>
+        <input type="number" name="amount" id="buy-insurance-amount" placeholder="1 ether" value="1"> <br>
+
+        <button class="btn btn-primary" id="submit-buy-insurance" >Buy Insurance</button>
     </div>
 </main>
 
