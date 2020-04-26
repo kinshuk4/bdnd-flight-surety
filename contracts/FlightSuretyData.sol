@@ -142,6 +142,11 @@ contract FlightSuretyData {
         return authorizedAppContracts[caller];
     }
 
+    function authorizeCaller(address appContract) external requireContractOwner
+    {
+        authorizedAppContracts[appContract] = true;
+    }
+
     /********************************************************************************************/
     /*                                     SMART CONTRACT FUNCTIONS                             */
     /********************************************************************************************/
@@ -179,7 +184,7 @@ contract FlightSuretyData {
         return airlines[airline].state;
     }
 
-    function getPaidAirlinesCount()
+    function getNumPaidAirlines()
     external view
     requireAuthorizedCaller
     returns (uint256)
@@ -219,8 +224,17 @@ contract FlightSuretyData {
     external
     requireAuthorizedCaller
     {
-        require(insurances[insuree][flight].amount != 0, "Insuree already insured");
+        require(insurances[insuree][flight].amount != amount, "Insuree already insured");
         insurances[insuree][flight] = Insurance(flight, amount, payoutAmount, InsuranceState.Bought);
+    }
+
+    function getInsurance(address insuree, string flight)
+    external view requireAuthorizedCaller
+    returns (uint256 amount, uint256 payoutAmount, InsuranceState state)
+    {
+        amount = insurances[insuree][flight].amount;
+        payoutAmount = insurances[insuree][flight].payoutAmount;
+        state = insurances[insuree][flight].state;
     }
 
     /**

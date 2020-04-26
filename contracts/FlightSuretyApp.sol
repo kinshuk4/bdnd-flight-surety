@@ -34,7 +34,7 @@ contract FlightSuretyApp {
         uint8 statusCode;
         uint256 updatedTimestamp;
         address airline;
-        string flightName;
+        string name;
     }
 
     mapping(bytes32 => Flight) private flights;
@@ -76,6 +76,9 @@ contract FlightSuretyApp {
     // Track all oracle responses
     // Key = hash(index, flight, timestamp)
     mapping(bytes32 => ResponseInfo) private oracleResponses;
+
+    // Passengers may pay up to 1 ether for purchasing flight insurance.
+    uint public constant MAX_INSURANCE_PREMIUM = 1 ether;
 
     /********************************************************************************************/
     /*                                       EVENT DEFINITIONS                                  */
@@ -210,7 +213,7 @@ contract FlightSuretyApp {
         require(flightSuretyData.getAirlineState(airline) == 0, "Airline has not registered.");
 
         bool approved = false;
-        uint256 approvedAirlineCount = flightSuretyData.getPaidAirlinesCount();
+        uint256 approvedAirlineCount = flightSuretyData.getNumPaidAirlines();
 
         if (approvedAirlineCount < MIN_AIRLINE_FOR_CONSENSUS_VOTING) {
             //No consensus needed
@@ -259,6 +262,21 @@ contract FlightSuretyApp {
         flightKeyList.push(flightKey);
     }
 
+
+    function getFlight(uint256 index) external view
+    returns (address airline, string memory name, uint256 timestamp, uint8 statusCode)
+    {
+        airline = flights[ flightKeyList[index] ].airline;
+        name = flights[ flightKeyList[index] ].name;
+        timestamp = flights[ flightKeyList[index] ].updatedTimestamp;
+        statusCode = flights[ flightKeyList[index] ].statusCode;
+    }
+
+    function getNumFlights() external view returns (uint256 count)
+    {
+        return flightKeyList.length;
+    }
+
     /**
      * @dev Called after oracle has updated flight status
      *
@@ -300,6 +318,29 @@ contract FlightSuretyApp {
         emit OracleRequest(index, airline, flight, timestamp);
     }
 
+    /**  Passengers */
+    function buyInsurance(address airline, string flight, uint256 timestamp)
+    external payable
+    {
+        bytes32 flightKey = getFlightKey(airline, flight, timestamp);
+        require(bytes(flights[flightKey].name).length > 0, "Flight doesn't exist");
+        require(msg.value <= MAX_INSURANCE_PREMIUM, "Passengers can pay a maximum premium of 1 ether");
+
+        dataContractAddress.transfer(msg.value);
+
+        uint256 payoutAmount = msg.value + msg.value/2;
+
+        flightSuretyData.buyInsurance(msg.sender, flight, msg.value, payoutAmount);
+
+        emit PassengerInsuranceBought(msg.sender, flightKey);
+    }
+
+    function getInsurance(string flight)
+    external view
+    returns (uint256 amount, uint256 payoutAmount, uint256 state)
+    {
+        return flightSuretyData.getInsurance(msg.sender, flight);
+    }
     /** ORACLES */
     // Register an oracle with the contract
     function registerOracle
@@ -443,7 +484,7 @@ contract FlightSuretyData {
 
     function updateAirlineState(address airlineAddress, uint8 state) external;
 
-    function getPaidAirlinesCount() external returns (uint);
+    function getNumPaidAirlines() external view returns (uint);
 
     function approveAirlineRegistration(address airline, address approver) external returns (uint8);
 
@@ -452,4 +493,6 @@ contract FlightSuretyData {
     function creditInsuredPassenger(address insuree, string flight) external;
 
     function payInsuredPassenger(address passenger) external;
+
+    function getInsurance(address passenger, string flight) external view returns (uint256 amount, uint256 payoutAmount, uint8 state);
 }
