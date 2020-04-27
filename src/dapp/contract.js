@@ -107,6 +107,7 @@ export default class Contract {
     }
 
     async getAllPassengerInsurances(flights) {
+        let self = this
         const insurances = [];
         for (const flight of flights) {
             const insurance = await this.flightSuretyApp.methods
@@ -125,6 +126,7 @@ export default class Contract {
 
 
     async claimInsurance(flight, callback) {
+        let self = this;
         const flightDetails = await self.flightSuretyApp.methods.getFlight(flight).call();
         let payload = {
             airline: flightDetails.airline,
@@ -139,12 +141,13 @@ export default class Contract {
             });
     }
 
-    async getBalance() {
+    async getBalance(callback) {
+        let self = this
         await self.flightSuretyApp.methods
             .getBalance()
             .call({ from: this.owner },
                 async (error, result) => {
-                resolve(this.web3.utils.fromWei(result, 'ether'));
+                callback(error, this.web3.utils.fromWei(result, 'ether'))
             });
     }
 

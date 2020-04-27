@@ -77,9 +77,43 @@ import './flightsurety.css';
             })
         })
 
+        DOM.elid('flight-status-refresh').addEventListener('click', () => {
+            contract.getAllFlights((error, results) => {
+                displayInContainer("flight-status-wrapper", [{
+                    label: 'Flight Statuses',
+                    value: JSON.stringify(results)
+                }])
+            })
+        })
+
+        DOM.elid('submit-claim').addEventListener('click', () => {
+            let flight = DOM.elid('flight-number-claim').value;
+            // Write transaction
+            contract.claimInsurance(Number(flight), (error, result) => {
+                displayInContainer("claim-insurance-wrapper",
+                    [{
+                        label: 'Claim Insurance Result',
+                        error: error,
+                        value: result
+                    }]);
+
+            });
+
+            contract.getBalance((error, balance) =>{
+                    displayInContainer("claim-insurance-wrapper",
+                        [{
+                            label: 'Amount Balance',
+                            error: error,
+                            value: balance
+                        }]);
+                }
+            );
+        })
+
     });
 
-    
+
+
 
 
 })();
