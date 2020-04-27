@@ -96,7 +96,7 @@ contract FlightSuretyApp {
     // Oracles track this and if they have a matching index
     // they fetch data and submit a response
     event OracleRequest(uint8 index, address airline, string flight, uint256 timestamp);
-    event OracleIsRegistered(uint8[3] idx, string message);
+    event OracleRegistered(uint8[3] idx, string message);
     event ContractOperationalStatus(bool status);
 
 
@@ -375,13 +375,6 @@ contract FlightSuretyApp {
         flightSuretyData.payInsuredPassenger(msg.sender);
     }
 
-    //    function getAuthorized(string flight)
-    //    external view
-    //    returns (uint8 index)
-    //    {
-    //        return flightSuretyData.getAuthorized(msg.sender, index);
-    //    }
-
     /** ORACLES */
     // Register an oracle with the contract
     function registerOracle
@@ -399,7 +392,7 @@ contract FlightSuretyApp {
             isRegistered : true,
             indexes : indexes
             });
-        emit OracleIsRegistered(indexes, "Oracle has been registered.");
+        emit OracleRegistered(indexes, "Oracle has been registered.");
     }
 
     function getMyIndexes
