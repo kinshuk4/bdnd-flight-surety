@@ -110,6 +110,28 @@ import './flightsurety.css';
             );
         })
 
+        DOM.elid('submit-withdraw').addEventListener('click', () => {
+            contract.withdrawBalance((error, result) => {
+                displayInContainer("withdraw-wrapper",
+                    [{
+                        label: 'Claim Insurance Result',
+                        error: error,
+                        value: result
+                    }]);
+
+            });
+
+            contract.getBalance((error, balance) =>{
+                    displayInContainer("claim-insurance-wrapper",
+                        [{
+                            label: 'Amount Balance',
+                            error: error,
+                            value: balance
+                        }]);
+                }
+            );
+        })
+
     });
 
 

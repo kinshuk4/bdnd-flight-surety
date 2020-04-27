@@ -107,7 +107,7 @@ export default class Contract {
     }
 
     async getAllPassengerInsurances(flights) {
-        let self = this
+        let self = this;
         const insurances = [];
         for (const flight of flights) {
             const insurance = await this.flightSuretyApp.methods
@@ -142,7 +142,7 @@ export default class Contract {
     }
 
     async getBalance(callback) {
-        let self = this
+        let self = this;
         await self.flightSuretyApp.methods
             .getBalance()
             .call({ from: this.owner },
@@ -151,14 +151,14 @@ export default class Contract {
             });
     }
 
-    async withdrawBalance() {
+    async withdrawBalance(callback) {
+        let self = this;
         await self.flightSuretyApp.methods
             .withdrawBalance()
             .send(
                 { from: this.owner },
-                (err, res) => {
-                    if (err) reject(err);
-                    resolve(res);
+                async (error, result) => {
+                   callback(error, result)
                 }
             );
     }
