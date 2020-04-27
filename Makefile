@@ -27,7 +27,7 @@ migrate-live:
 rpc:
 	testrpc --port 7545 -u 0 --gas 9712388
 
-test: compile
+test: migrate
 	truffle test --network development
 
 console:

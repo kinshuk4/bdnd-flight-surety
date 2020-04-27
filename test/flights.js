@@ -1,6 +1,6 @@
 var Test = require('../config/testConfig.js');
 
-contract('Flight Surety Passenger Tests', async (accounts) => {
+contract('Flight Surety Flight Tests', async (accounts) => {
 
     var config;
     let passenger_choose = 0;

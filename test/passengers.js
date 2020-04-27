@@ -19,7 +19,6 @@ contract('Flight Surety Passenger Tests', async (accounts) => {
     });
 
     it('Passengers may pay up to 1 ether for purchasing flight insurance', async function () {
-
         const flight1 = await config.flightSuretyApp.getFlight(passenger_choose);
         const amount = await config.flightSuretyApp.MAX_INSURANCE_PREMIUM.call();
 
@@ -77,7 +76,7 @@ contract('Flight Surety Passenger Tests', async (accounts) => {
 
     it('Passenger can check status of the flight', async function () {
 
-        const flight1 = await config.flightSuretyApp.getFlight(0);
+        const flight1 = await config.flightSuretyApp.getFlight(passenger_choose);
 
         const fetchFlightStatus = await config.flightSuretyApp.fetchFlightStatus(
             flight1.airline,
@@ -92,7 +91,7 @@ contract('Flight Surety Passenger Tests', async (accounts) => {
 
     it('If flight is delayed due to airline fault, passenger receives credit of 1.5X the amount they paid', async function () {
 
-        const flight1 = await config.flightSuretyApp.getFlight(0);
+        const flight1 = await config.flightSuretyApp.getFlight(passenger_choose);
 
         const fetchFlightStatus = await config.flightSuretyApp.fetchFlightStatus(
             flight1.airline,
