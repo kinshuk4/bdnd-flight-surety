@@ -146,6 +146,10 @@ function display(title, description, results) {
     let section = DOM.section();
     section.appendChild(DOM.h2(title));
     section.appendChild(DOM.h5(description));
+    appendResultsToDivSection(results, section, displayDiv)
+}
+
+function appendResultsToDivSection(results, section, displayDiv) {
     results.map((result) => {
         let row = section.appendChild(DOM.div({className: 'row'}));
         row.appendChild(DOM.div({className: 'col-sm-4 field'}, result.label));
@@ -153,21 +157,12 @@ function display(title, description, results) {
         section.appendChild(row);
     })
     displayDiv.append(section);
-
 }
 
 function displayInContainer(containerId, results) {
     let displayDiv = DOM.elid(containerId);
     let section = DOM.section();
-
-    results.map((result) => {
-        let row = section.appendChild(DOM.div({className: 'row'}));
-        row.appendChild(DOM.div({className: 'col-sm-4 field'}, result.label));
-        row.appendChild(DOM.div({className: 'col-sm-8 field-value'}, result.error ? String(result.error) : String(result.value)));
-        section.appendChild(row);
-        console.log(section)
-    })
-    displayDiv.append(section);
+    appendResultsToDivSection(results, section, displayDiv);
 
 }
 
