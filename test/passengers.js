@@ -9,7 +9,7 @@ contract('Flight Surety Passenger Tests', async (accounts) => {
     const passenger = accounts[30];
     before('setup contract', async () => {
         config = await Test.Config(accounts);
-        await config.flightSuretyData.authorizeCaller(config.flightSuretyApp.address);
+        await config.flightSuretyData.setAppContractAuthorizationStatus(config.flightSuretyApp.address, true);
     });
 
     it('Passengers can choose from a fixed list of flight numbers and departure that are defined in the Dapp client', async function () {

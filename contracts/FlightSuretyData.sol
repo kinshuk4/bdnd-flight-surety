@@ -142,11 +142,6 @@ contract FlightSuretyData {
         return authorizedAppContracts[caller];
     }
 
-    function authorizeCaller(address appContract) external requireContractOwner
-    {
-        authorizedAppContracts[appContract] = true;
-    }
-
     /********************************************************************************************/
     /*                                     SMART CONTRACT FUNCTIONS                             */
     /********************************************************************************************/
