@@ -1,8 +1,8 @@
 compile:
 	truffle compile
 
-init:
-	npm i -g truffle@nodeLTSe
+install:
+	npm i -g truffle@nodeLTS
 	npm install
 
 clean:

@@ -19,7 +19,7 @@ Start ganache. If you're running ganache-cli and using the mnemonic in class, it
 ganache-cli -a 50 -l 99999999 -m "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat"
 ```
 
-If you are running the Ganache GUI, just do quick start and change number of accounts to 50. 
+If you are running the Ganache GUI, just do quick start and change number of accounts to 50.
 
 Truffle config already points to port 8545 in case of ganache cli, change it to 7545.
 
@@ -30,6 +30,8 @@ if you are migratng again:
 truffle migrate --reset
 ```
 
+OR 
+`make migrate`
 
 ## Develop Client
 
@@ -37,6 +39,7 @@ To run truffle tests:
 
 `truffle test ./test/flightSurety.js`
 `truffle test ./test/oracles.js`
+`make test`
 
 To use the dapp:
 
@@ -60,7 +63,6 @@ To build dapp for prod:
 `npm run dapp:prod`
 
 Deploy the contents of the ./dapp folder
-
 
 ## Resources
 
